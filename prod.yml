@@ -1,0 +1,92 @@
+apiVersion: v1
+data:
+  altGreeting: Have a plum!
+  enableRisky: "true"
+kind: ConfigMap
+metadata:
+  name: prod-the-map
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prod-frontend-service
+spec:
+  ports:
+  - port: 3000
+    targetPort: 8080
+  selector:
+    app: frontend
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prod-voting-service
+spec:
+  ports:
+  - port: 3001
+    targetPort: 8080
+  selector:
+    app: voting
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-frontend-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - env:
+        - name: VOTING_API_ADDR
+          value: voting-service:3001
+        - name: ALT_GREETING
+          valueFrom:
+            configMapKeyRef:
+              key: altGreeting
+              name: prod-the-map
+        image: frontend-image
+        name: frontend
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-voting-deployment
+spec:
+  selector:
+    matchLabels:
+      app: voting
+  template:
+    metadata:
+      labels:
+        app: voting
+    spec:
+      containers:
+      - image: voting-image
+        name: voting
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 32Mi

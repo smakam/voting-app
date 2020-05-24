@@ -1,0 +1,9 @@
+resources:
+  - frontend.yml
+  - voting.yml
+  # - map.yml
+configMapGenerator:
+- name: the-map
+  literals:	
+    - background=normal
+    - enableRisky="false"

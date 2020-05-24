@@ -1,5 +1,7 @@
-apiVersion: skaffold/v1beta7
+apiVersion: skaffold/v2alpha2
 kind: Config
+metadata:
+  name: my-voting-app
 build:
   artifacts:
     - image: frontend-image
@@ -11,12 +13,40 @@ build:
   local:
     useBuildkit: false
     useDockerCLI: false
-deploy:
-  kubectl:
-    manifests:
-      - kubernetes-manifests/*.yaml
 profiles:
   - build:
-      googleCloudBuild: {}
-    deploy: {}
-    name: gke
+    deploy:
+      kubectl:
+        manifests:
+          - kubernetes-manifests/frontend.yml
+          - kubernetes-manifests/voting.yml
+    name: local
+  - build:
+      googleCloudBuild:
+        projectId: sreemakam-demo
+    deploy:
+      kubectl:
+        manifests:
+          - kubernetes-manifests/*.yml
+    name: cloud
+  - build:
+      googleCloudBuild:
+        projectId: sreemakam-demo
+    deploy:
+      kustomize:
+        path: ./base-manifest/
+    name: base
+  - build:
+      googleCloudBuild:
+        projectId: sreemakam-demo
+    deploy:
+      kustomize:
+        path: ./dev-manifest/
+    name: clouddev
+  - build:
+      googleCloudBuild:
+        projectId: sreemakam-demo
+    deploy:
+      kustomize:
+        path: ./prod-manifest/
+    name: cloudprod

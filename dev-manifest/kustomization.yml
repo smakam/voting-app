@@ -1,0 +1,7 @@
+#namePrefix: dev-
+bases:
+  - ../base-manifest
+commonLabels:
+  stage: staging
+patches:
+  - patch.yml

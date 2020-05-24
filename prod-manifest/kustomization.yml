@@ -1,0 +1,7 @@
+#namePrefix: prod-
+bases:
+  - ../base-manifest
+commonLabels:
+  stage: production
+patches:
+  - patch.yml
